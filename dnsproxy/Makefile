@@ -5,12 +5,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dnsproxy
-PKG_VERSION:=0.69.2
+PKG_VERSION:=0.76.1
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/AdguardTeam/dnsproxy/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=aa1cea0eea683bde017acbb30c09c96b24b30133e157e743666be900ad7560ea
+PKG_HASH:=e11c0b67aa8784a9d1e8baf2724fe438dfe06a12f928eba8f1530b7aeb47f7db
 
 PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
 PKG_LICENSE:=Apache-2.0
@@ -45,12 +45,16 @@ endef
 define Package/dnsproxy/install
 	$(call GoPackage/Package/Install/Bin,$(1))
 
+	$(INSTALL_DIR) $(1)/etc/capabilities/
+	$(INSTALL_DATA) $(CURDIR)/files/dnsproxy.json $(1)/etc/capabilities/dnsproxy.json
 	$(INSTALL_DIR) $(1)/etc/config/
 	$(INSTALL_CONF) $(CURDIR)/files/dnsproxy.config $(1)/etc/config/dnsproxy
 	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_BIN) $(CURDIR)/files/dnsproxy.init $(1)/etc/init.d/dnsproxy
 	$(INSTALL_DIR) $(1)/etc/uci-defaults/
 	$(INSTALL_BIN) $(CURDIR)/files/dnsproxy.defaults $(1)/etc/uci-defaults/80-dnsproxy-migration
+	$(INSTALL_DIR) $(1)/etc/sysctl.d/
+	$(INSTALL_CONF) ./files/dnsproxy.sysctl $(1)/etc/sysctl.d/50-dnsproxy.conf
 endef
 
 define Package/dnsproxy/conffiles

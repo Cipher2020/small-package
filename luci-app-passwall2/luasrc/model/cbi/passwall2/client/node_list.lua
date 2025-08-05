@@ -1,7 +1,7 @@
 local api = require "luci.passwall2.api"
 local appname = api.appname
-local sys = api.sys
 local datatypes = api.datatypes
+local sys = api.sys
 
 m = Map(appname)
 api.set_apply_on_parse(m)
@@ -53,14 +53,28 @@ function s.remove(e, t)
 			m:set(s[".name"], "node", "default")
 		end
 	end)
+	if (m:get(t, "add_mode") or "0") == "2" then
+		local add_from = m:get(t, "add_from") or ""
+		if add_from ~= "" then
+			m.uci:foreach(appname, "subscribe_list", function(s)
+				if s["remark"] == add_from then
+					m:del(s[".name"], "md5")
+				end
+			end)
+		end
+	end
 	TypedSection.remove(e, t)
-	local new_node = "nil"
+	local new_node
 	local node0 = m:get("@nodes[0]") or nil
 	if node0 then
 		new_node = node0[".name"]
 	end
-	if (m:get("@global[0]", "node") or "nil") == t then
-		m:set('@global[0]', "node", new_node)
+	if (m:get("@global[0]", "node") or "") == t then
+		if new_node then
+			m:set('@global[0]', "node", new_node)
+		else
+			m:del('@global[0]', "node")
+		end
 	end
 end
 
@@ -92,15 +106,30 @@ o.cfgvalue = function(t, n)
 		local protocol = m:get(n, "protocol")
 		if protocol == "_balancing" then
 			protocol = translate("Balancing")
+		elseif protocol == "_urltest" then
+			protocol = "URLTest"
 		elseif protocol == "_shunt" then
 			protocol = translate("Shunt")
 		elseif protocol == "vmess" then
 			protocol = "VMess"
 		elseif protocol == "vless" then
 			protocol = "VLESS"
+		elseif protocol == "shadowsocks" then
+			protocol = "SS"
+		elseif protocol == "shadowsocksr" then
+			protocol = "SSR"
+		elseif protocol == "wireguard" then
+			protocol = "WG"
+		elseif protocol == "hysteria" then
+			protocol = "HY"
+		elseif protocol == "hysteria2" then
+			protocol = "HY2"
+		elseif protocol == "anytls" then
+			protocol = "AnyTLS"
 		else
 			protocol = protocol:gsub("^%l",string.upper)
 		end
+		if type == "sing-box" then type = "Sing-Box" end
 		type = type .. " " .. protocol
 	end
 	local address = m:get(n, "address") or ""

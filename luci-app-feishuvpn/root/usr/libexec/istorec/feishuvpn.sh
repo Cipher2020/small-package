@@ -13,22 +13,24 @@ do_install() {
     exit 1
   fi
 
-  [ -z "$image_name" ] && image_name="registry.cn-qingdao.aliyuncs.com/feishuwg/p2p:v2.2"
+  [ -z "$image_name" ] && image_name="registry.cn-qingdao.aliyuncs.com/feishuwg/p2p:latest"
   echo "docker pull ${image_name}"
   docker pull ${image_name}
   docker rm -f feishuvpn
+  mkdir -p "$config"
+  [ -s "$config/machine-id" ] || cat /var/lib/dbus/machine-id > "$config/machine-id"
 
-  local cmd="docker run --restart=unless-stopped -d -h FeiShuVpnServer -v \"$config:/data/feishu/conf\" "
+  local cmd="docker run --restart=unless-stopped -d -h FeiShuVpnServer -v \"$config:/app/data\" -v \"$config/machine-id:/etc/machine-id\" "
 
   cmd="$cmd\
   --cap-add=ALL \
   --privileged=true \
   --device=/dev/net/tun \
-  --dns=127.0.0.1 \
+  --dns=223.5.5.5 \
   --network=host "
 
-  local tz="`uci get system.@system[0].zonename | sed 's/ /_/g'`"
-  [ -z "$tz" ] || cmd="$cmd -e TZ=$tz"
+ # local tz="`uci get system.@system[0].zonename | sed 's/ /_/g'`"
+ # [ -z "$tz" ] || cmd="$cmd -e TZ=$tz"
 
   cmd="$cmd -v /mnt:/mnt"
   mountpoint -q /mnt && cmd="$cmd:rslave"
@@ -62,7 +64,7 @@ case ${ACTION} in
     docker ${ACTION} feishuvpn
   ;;
   "status")
-    docker ps --all -f 'name=feishuvpn' --format '{{.State}}'
+    docker ps --all -f 'name=^/feishuvpn$' --format '{{.State}}'
   ;;
   "port")
     echo 9091

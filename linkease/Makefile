@@ -10,13 +10,25 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_LINKEASE:=$(ARCH)
 
 PKG_NAME:=linkease
-PKG_VERSION:=1.3.9
-PKG_RELEASE:=$(PKG_ARCH_LINKEASE)-2
-PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://fw0.koolcenter.com/binary/LinkEase/LinuxStorage/
-PKG_HASH:=3477cc56e11a42e15239c39cd01d9bc289ddc406825b8e0378ac175cebbf5196
+# use PKG_SOURCE_DATE instead of PKG_VERSION for compitable
+PKG_SOURCE_DATE:=1.7.4
+PKG_RELEASE:=4
+ARCH_HEXCODE:=
+ifeq ($(ARCH),x86_64)
+ARCH_HEXCODE=8664
+else ifeq ($(ARCH),aarch64)
+ARCH_HEXCODE=aa64
+else ifeq ($(ARCH),arm)
+ARCH_HEXCODE=aa32
+else ifeq ($(ARCH),mipsel)
+ARCH_HEXCODE=1b0c
+endif
+PKG_SOURCE_VERSION:=$(ARCH_HEXCODE)
+PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_SOURCE_DATE).tar.gz
+PKG_SOURCE_URL:=http://dl.istoreos.com/binary/LinkEase/LinuxStorage/
+PKG_HASH:=3ef1b2e8034c8b59efb8d432c19e1cbc71f3a88b7cbcd039ddd31860e0129c90
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-binary-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-binary-$(PKG_SOURCE_DATE)
 
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
@@ -28,9 +40,9 @@ define Package/$(PKG_NAME)
 	CATEGORY:=Network
 	SUBMENU:=Web Servers/Proxies
 	TITLE:=LinkEase - the file cloud
-	DEPENDS:=@(arm||x86_64||aarch64) +ffmpeg-remux
+	DEPENDS:=@(arm||x86_64||aarch64) +linkmount
 	PKGARCH:=all
-	URL:=https://www.ddnsto.com/linkease/
+	URL:=https://www.linkease.com/
 endef
 
 define Package/$(PKG_NAME)/description
@@ -45,6 +57,7 @@ define Package/$(PKG_NAME)/postinst
 #!/bin/sh
 if [ -z "$${IPKG_INSTROOT}" ]; then
 	[ -f /etc/uci-defaults/linkease ] && /etc/uci-defaults/linkease && rm -f /etc/uci-defaults/linkease
+	exit 0
 fi
 endef
 
@@ -58,8 +71,8 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/sbin/linkease-plugins $(1)/etc/config $(1)/etc/init.d $(1)/etc/uci-defaults
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/linkease.$(PKG_ARCH_LINKEASE) $(1)/usr/sbin/linkease
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/heif-converter.$(PKG_ARCH_LINKEASE) $(1)/usr/sbin/heif-converter
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/linkease-media.$(PKG_ARCH_LINKEASE) $(1)/usr/sbin/linkease-media
 	$(INSTALL_BIN) ./files/linkease-config.sh $(1)/usr/sbin/linkease-config.sh
-	$(INSTALL_BIN) ./files/aria2.sh $(1)/usr/sbin/linkease-plugins/aria2.sh
 	$(INSTALL_CONF) ./files/linkease.config $(1)/etc/config/linkease
 	$(INSTALL_BIN) ./files/linkease.init $(1)/etc/init.d/linkease
 	$(INSTALL_BIN) ./files/linkease.uci-default $(1)/etc/uci-defaults/linkease
