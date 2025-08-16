@@ -5,7 +5,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=filebrowser
-PKG_VERSION:=v2.28.0 
+PKG_VERSION:=2.28.0 
 # 默认下载2.32版本报错， 下载2.28版本安装正常 open public/index.html: file does not exist
 PKG_RELEASE:=1
 
