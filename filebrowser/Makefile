@@ -48,6 +48,8 @@ endef
 define Build/Compile
 	( \
 		pushd "$(PKG_BUILD_DIR)/frontend" ; \
+        npm install
+        npm run build
 		npm ci; \
 		npm run lint ; \
 		npm run build ; \
