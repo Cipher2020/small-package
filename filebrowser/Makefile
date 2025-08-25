@@ -10,9 +10,8 @@ PKG_VERSION:=2.42.5
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/filebrowser/filebrowser/tar.gz/v${PKG_VERSION}?
-PKG_HASH:=7e58321e9a3f494dc94b6d2f93954d0a3c8ff17768f8e670d8e9a001ed78ab82
-
+PKG_SOURCE_URL:=https://codeload.github.com/cipher2020/filebrowser/tar.gz/v${PKG_VERSION}?
+PKG_HASH:=skip
 PKG_LICENSE:=Apache-2.0
 PKG_LICENSE_FILES:=LICENSE
 PKG_MAINTAINER:=kenzo <kenzok8@gmail.com>
@@ -22,7 +21,7 @@ PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 PKG_BUILD_FLAGS:=no-mips16
 
-GO_PKG:=github.com/filebrowser/filebrowser
+GO_PKG:=github.com/cipher2020/filebrowser
 GO_PKG_LDFLAGS_X:= \
 	$(GO_PKG)/v2/version.CommitSHA=$(PKG_SOURCE_VERSION) \
 	$(GO_PKG)/v2/version.Version=v$(PKG_VERSION)
@@ -34,7 +33,7 @@ define Package/filebrowser
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=Web File Browser
-  URL:=https://github.com/filebrowser/filebrowser
+  URL:=https://github.com/cipher2020/filebrowser
   DEPENDS:=$(GO_ARCH_DEPENDS)
 endef
 
